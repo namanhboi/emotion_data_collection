@@ -98,6 +98,13 @@ def read_emotion(emo_text):
             return i
     return None
 
+def vconcat_resize_min(im_list, interpolation=cv2.INTER_CUBIC):
+    w_min = min(im.shape[1] for im in im_list)
+    im_list_resize = [cv2.resize(im, (w_min, int(im.shape[0] * w_min / im.shape[1])), interpolation=interpolation)
+                      for im in im_list]
+    return cv2.vconcat(im_list_resize)
+
+
 def data_record(path, gnd_truth_index):
     cap = cv2.VideoCapture(0)
 
@@ -141,7 +148,9 @@ def data_record(path, gnd_truth_index):
         if not ret:
             print("All cameras off")
             break
-        canvas = cv2.vconcat((empty_white_space, frame))
+        frame_resize = cv2.resize(frame, (resolution[0], resolution[1]))
+        canvas = cv2.vconcat((empty_white_space, frame_resize))
+        # canvas = vconcat_resize_min((empty_white_space, frame))
         # print(frame.shape, canvas.shape, empty_white_space.shape)
         if  not start_flag:
             cv2.putText(canvas, "Please press space to begin the session.", (10, karaoke_block_height + 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 225), thickness = 2 )
